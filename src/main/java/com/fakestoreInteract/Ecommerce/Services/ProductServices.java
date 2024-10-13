@@ -1,21 +1,24 @@
 package com.fakestoreInteract.Ecommerce.Services;
 
 import com.fakestoreInteract.Ecommerce.DTOs.ProductDto;
+import com.fakestoreInteract.Ecommerce.DTOs.ProductRequestDto;
+import com.fakestoreInteract.Ecommerce.Exceptions.InvalidProductException;
+import com.fakestoreInteract.Ecommerce.models.Product;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
+
 public interface ProductServices {
-    @GetMapping()
-    String getAllProducts();
 
-    @GetMapping("/{productId}")
-    String getSingleProduct(@PathVariable("productId") Long productId);
+    List<Product> getAllProducts() throws InvalidProductException;
 
-    @PostMapping()
-    String addNewProduct(@RequestBody ProductDto productDto);
 
-    @PutMapping("/{productId}")
-    String updateProduct(@PathVariable("productId") Long productId);
+    Product getSingleProduct(Long productId) throws InvalidProductException;
 
-    @DeleteMapping("/{productId}")
-    String deleteProduct(@PathVariable Long productId);
+    Product addNewProduct(ProductDto productDto) throws InvalidProductException;
+
+    Product updateProduct(Long productId, ProductDto productDto) throws InvalidProductException;
+
+    Product deleteProduct(Long productId) throws InvalidProductException;
 }

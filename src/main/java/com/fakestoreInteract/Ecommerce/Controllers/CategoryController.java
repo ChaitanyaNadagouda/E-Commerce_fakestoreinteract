@@ -6,27 +6,23 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/product/category")
-public class CategoryController implements com.fakestoreInteract.Ecommerce.Services.CategoryService {
+public class CategoryController {
 
-    @Override
     @GetMapping()
     public String getAllCategories(){
         return "all categories";
     }
 
-    @Override
     @GetMapping("/{categoryId}")
     public String getSingleCategory(@PathVariable("categoryId") Long categoryId){
         return "one category" + categoryId;
     }
 
-    @Override
-    @GetMapping("/{categoryId}")
-    public String getAllProductsInCategory(@PathVariable("categoryid") Long categoryId){
+    @GetMapping("/{categoryId}/products")
+    public String getAllProductsInCategory(@PathVariable("categoryId") Long categoryId){
         return "getting the products in category : " + categoryId ;
     }
 
-    @Override
     @PostMapping()
     public String addSingleCategory(@RequestBody CategoryDto categoryDto){
         return "Adding single category";
