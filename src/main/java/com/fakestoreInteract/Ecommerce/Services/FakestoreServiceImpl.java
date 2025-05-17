@@ -16,18 +16,18 @@ import java.util.List;
 
 public class FakestoreServiceImpl implements ProductServices{
 
-    @Autowired
-    private RestTemplateBuilder restTemplateBuilder;
-
     private final String BASE_URL = "https://fakestoreapi.com/products";
 
-    public FakestoreServiceImpl(RestTemplateBuilder restTemplateBuilder) {
-        this.restTemplateBuilder = restTemplateBuilder;
+    @Autowired
+    private RestTemplate restTemplate;
+
+    public FakestoreServiceImpl(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
     }
 
     @Override
     public List<Product> getAllProducts() throws InvalidProductException {
-        RestTemplate restTemplate = restTemplateBuilder.build();
+
         ResponseEntity<ProductDto[]> response = restTemplate.getForEntity(BASE_URL, ProductDto[].class);
 
         if (response.getBody() == null) {
@@ -39,7 +39,6 @@ public class FakestoreServiceImpl implements ProductServices{
 
     @Override
     public Product getSingleProduct(Long productId) throws InvalidProductException {
-        RestTemplate restTemplate = restTemplateBuilder.build();
         ResponseEntity<ProductDto> response = restTemplate.getForEntity(BASE_URL + "/{id}", ProductDto.class, productId);
 
         ProductDto dto = response.getBody();
@@ -52,7 +51,7 @@ public class FakestoreServiceImpl implements ProductServices{
 
     @Override
     public Product addNewProduct(ProductDto productDto) throws InvalidProductException {
-        RestTemplate restTemplate = restTemplateBuilder.build();
+
         ResponseEntity<ProductDto> response = restTemplate.postForEntity(BASE_URL, productDto, ProductDto.class);
 
         ProductDto responseDto = response.getBody();
@@ -65,7 +64,7 @@ public class FakestoreServiceImpl implements ProductServices{
 
     @Override
     public Product updateProduct(Long productId, ProductDto productDto) throws InvalidProductException {
-        RestTemplate restTemplate = restTemplateBuilder.build();
+
 
         RequestCallback requestCallback = restTemplate.httpEntityCallback(productDto, ProductDto.class);
         HttpMessageConverterExtractor<ProductDto> responseExtractor =
@@ -82,7 +81,7 @@ public class FakestoreServiceImpl implements ProductServices{
 
     @Override
     public Product deleteProduct(Long productId) throws InvalidProductException {
-        RestTemplate restTemplate = restTemplateBuilder.build();
+
 
         ResponseEntity<ProductDto> response = restTemplate.exchange(BASE_URL + "/" + productId, HttpMethod.DELETE, null, ProductDto.class);
         ProductDto deletedProductDto = response.getBody();
@@ -96,7 +95,7 @@ public class FakestoreServiceImpl implements ProductServices{
 
     @Override
     public List<Product> getProductsByCategory(String categoryName) throws InvalidProductException {
-        RestTemplate restTemplate = restTemplateBuilder.build();
+
         ResponseEntity<ProductDto[]> response = restTemplate.getForEntity(BASE_URL + "/category/{category}", ProductDto[].class, categoryName);
 
         ProductDto[] productDtos = response.getBody();
