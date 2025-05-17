@@ -1,16 +1,12 @@
 package com.fakestoreInteract.Ecommerce.Services;
 
 import com.fakestoreInteract.Ecommerce.DTOs.ProductDto;
-import com.fakestoreInteract.Ecommerce.DTOs.ProductRequestDto;
-//import com.fakestoreInteract.Ecommerce.DTOs.ProductResponseDto;
 import com.fakestoreInteract.Ecommerce.Exceptions.InvalidProductException;
 import com.fakestoreInteract.Ecommerce.models.Product;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpMessageConverterExtractor;
 import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.RestTemplate;
@@ -18,14 +14,12 @@ import org.springframework.web.client.RestTemplate;
 import java.util.ArrayList;
 import java.util.List;
 
-@Service
-@RequiredArgsConstructor
 public class FakestoreServiceImpl implements ProductServices{
 
     @Autowired
     private RestTemplateBuilder restTemplateBuilder;
 
-//    private ProductDto productDto;
+    private final String BASE_URL = "https://fakestoreapi.com/products";
 
     public FakestoreServiceImpl(RestTemplateBuilder restTemplateBuilder) {
         this.restTemplateBuilder = restTemplateBuilder;
@@ -34,62 +28,92 @@ public class FakestoreServiceImpl implements ProductServices{
     @Override
     public List<Product> getAllProducts() throws InvalidProductException {
         RestTemplate restTemplate = restTemplateBuilder.build();
-        ResponseEntity<ProductDto[]> productDtos = restTemplate.getForEntity("https://fakestoreapi.com/products",ProductDto[].class);
-        return getListOfProductsfromProductDtoArray(productDtos);
-    }
+        ResponseEntity<ProductDto[]> response = restTemplate.getForEntity(BASE_URL, ProductDto[].class);
 
-    private List<Product> getListOfProductsfromProductDtoArray(ResponseEntity<ProductDto[]> productDtos) throws InvalidProductException {
-        List<Product> productList = new ArrayList<>();
-        for(ProductDto productDto:productDtos.getBody()){
-            productList.add(productDto.getProductFromProductDto(productDto));
+        if (response.getBody() == null) {
+            throw new InvalidProductException("No products found");
         }
-        return productList;
+
+        return convertDtoArrayToProductList(response.getBody());
     }
 
     @Override
     public Product getSingleProduct(Long productId) throws InvalidProductException {
         RestTemplate restTemplate = restTemplateBuilder.build();
-        ResponseEntity<ProductDto> response = restTemplate.getForEntity("https://fakestoreapi.com/products/{id}",ProductDto.class,productId);
-        ProductDto productDto = response.getBody();
-        if(productDto==null){
-            throw new InvalidProductException();
+        ResponseEntity<ProductDto> response = restTemplate.getForEntity(BASE_URL + "/{id}", ProductDto.class, productId);
+
+        ProductDto dto = response.getBody();
+        if (dto == null) {
+            throw new InvalidProductException("Product not found with ID: " + productId);
         }
-        Product product = productDto.getProductFromProductDto(productDto);
-        return product;
+
+        return dto.getProductFromProductDto(dto);
     }
 
     @Override
     public Product addNewProduct(ProductDto productDto) throws InvalidProductException {
         RestTemplate restTemplate = restTemplateBuilder.build();
-        ResponseEntity<ProductDto> response = restTemplate.postForEntity(
-                "https://fakestoreapi.com/products",productDto,ProductDto.class);
-        ProductDto productDtoresp = response.getBody();
-        Product newProduct = productDtoresp.getProductFromProductDto(productDtoresp);
-        return newProduct;
+        ResponseEntity<ProductDto> response = restTemplate.postForEntity(BASE_URL, productDto, ProductDto.class);
+
+        ProductDto responseDto = response.getBody();
+        if (responseDto == null) {
+            throw new InvalidProductException("Failed to add product");
+        }
+
+        return responseDto.getProductFromProductDto(responseDto);
     }
 
     @Override
     public Product updateProduct(Long productId, ProductDto productDto) throws InvalidProductException {
-        //put
         RestTemplate restTemplate = restTemplateBuilder.build();
-        // we want the updated object also but 2 network calls so dig deep can we get it in one network call?
-//        restTemplate.put();
-        RequestCallback requestCallback = restTemplate.httpEntityCallback(productDto,ProductDto.class);
-        HttpMessageConverterExtractor<ProductDto> responseExtractor = new HttpMessageConverterExtractor(ProductDto.class, restTemplate.getMessageConverters());
-        ProductDto responseDto = restTemplate.execute("https://fakestoreapi.com/products/" + productId, HttpMethod.PUT, requestCallback, responseExtractor);
+
+        RequestCallback requestCallback = restTemplate.httpEntityCallback(productDto, ProductDto.class);
+        HttpMessageConverterExtractor<ProductDto> responseExtractor =
+                new HttpMessageConverterExtractor<>(ProductDto.class, restTemplate.getMessageConverters());
+
+        ProductDto responseDto = restTemplate.execute(BASE_URL + "/" + productId, HttpMethod.PUT, requestCallback, responseExtractor);
+
+        if (responseDto == null) {
+            throw new InvalidProductException("Failed to update product with ID: " + productId);
+        }
+
         return responseDto.getProductFromProductDto(responseDto);
-    }  
+    }
 
     @Override
     public Product deleteProduct(Long productId) throws InvalidProductException {
         RestTemplate restTemplate = restTemplateBuilder.build();
-        ResponseEntity<ProductDto> resp = restTemplate.exchange("https://fakestoreapi.com/products/" + productId, HttpMethod.DELETE, null, ProductDto.class);
-        ProductDto deletedProductDto = resp.getBody();
-        Product productFromProductDto = deletedProductDto.getProductFromProductDto(deletedProductDto);
-//        if (resp.getStatusCode().is2xxSuccessful()) {
-//            productFromProductDto.setDeleted(true);
-//        }
-        return productFromProductDto;
-//        return resp.getStatusCode().is2xxSuccessful()?deletedProductDto.getProductFromProductDto(deletedProductDto,true) : deletedProductDto.getProductFromProductDto(deletedProductDto,false);
+
+        ResponseEntity<ProductDto> response = restTemplate.exchange(BASE_URL + "/" + productId, HttpMethod.DELETE, null, ProductDto.class);
+        ProductDto deletedProductDto = response.getBody();
+
+        if (deletedProductDto == null) {
+            throw new InvalidProductException("Failed to delete product with ID: " + productId);
+        }
+
+        return deletedProductDto.getProductFromProductDto(deletedProductDto);
+    }
+
+    @Override
+    public List<Product> getProductsByCategory(String categoryName) throws InvalidProductException {
+        RestTemplate restTemplate = restTemplateBuilder.build();
+        ResponseEntity<ProductDto[]> response = restTemplate.getForEntity(BASE_URL + "/category/{category}", ProductDto[].class, categoryName);
+
+        ProductDto[] productDtos = response.getBody();
+        if (productDtos == null || productDtos.length == 0) {
+            throw new InvalidProductException("No products found in category: " + categoryName);
+        }
+
+        return convertDtoArrayToProductList(productDtos);
+    }
+
+    private List<Product> convertDtoArrayToProductList(ProductDto[] productDtos) throws InvalidProductException {
+        List<Product> products = new ArrayList<>();
+        for (ProductDto dto : productDtos) {
+            if (dto != null) {
+                products.add(dto.getProductFromProductDto(dto));
+            }
+        }
+        return products;
     }
 }

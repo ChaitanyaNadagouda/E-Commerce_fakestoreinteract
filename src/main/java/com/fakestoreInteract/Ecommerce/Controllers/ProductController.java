@@ -21,79 +21,68 @@ public class ProductController{
     @Autowired
     private FakestoreServiceImpl fakestoreService;
 
-//    @Override
     @GetMapping()
-    public ResponseEntity<List<Product>> getAllProducts() throws InvalidProductException {
-        List<Product> productList = new ArrayList<>();
-        ResponseEntity<List<Product>> responseList;
+    public ResponseEntity<List<Product>> getAllProducts() {
         try {
-            productList = fakestoreService.getAllProducts();
-            responseList = new ResponseEntity<>(productList,HttpStatus.OK);
-        } catch (InvalidProductException e){
-            responseList = new ResponseEntity<>(null,HttpStatus.NOT_FOUND);
+            List<Product> productList = fakestoreService.getAllProducts();
+            return ResponseEntity.ok(productList);
+        } catch (InvalidProductException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
-
-        return responseList;
     }
-
 
     @GetMapping("/{productId}")
-    public ResponseEntity<ProductWrapper> getSingleProduct(@PathVariable("productId") Long productId) throws InvalidProductException{
-
-        /*
-        Product singleProduct ;
-        ProductWrapper productWrapper ;
-        ResponseEntity<ProductWrapper> response ;
-        */
-        Product singleProduct = fakestoreService.getSingleProduct(productId);
-        ProductWrapper productWrapper = new ProductWrapper(singleProduct,"Successfully retrieved product");
-        ResponseEntity<ProductWrapper> response = new ResponseEntity<>(productWrapper,HttpStatus.OK);
-
-        //another way to handle exception :
-        /*
+    public ResponseEntity<ProductWrapper> getSingleProduct(@PathVariable("productId") Long productId) {
         try {
-            singleProduct = fakestoreService.getSingleProduct(productId);
-            productWrapper = new ProductWrapper(singleProduct,"Successfully retrieved product");
-            response = new ResponseEntity<>(productWrapper,HttpStatus.OK);
-        }catch (InvalidProductException e){
-            productWrapper = new ProductWrapper(null,"Product not found");
-            response = new ResponseEntity<>(productWrapper,HttpStatus.NOT_FOUND);
+            Product singleProduct = fakestoreService.getSingleProduct(productId);
+            ProductWrapper productWrapper = new ProductWrapper(singleProduct, "Successfully retrieved product");
+            return ResponseEntity.ok(productWrapper);
+        } catch (InvalidProductException e) {
+            return new ResponseEntity<>(new ProductWrapper(null, "Product not found"), HttpStatus.NOT_FOUND);
         }
-         */
-
-        return response;
     }
-
 
     @PostMapping()
-    public ResponseEntity<ProductWrapper> addNewProduct(@RequestBody ProductDto productDto) throws InvalidProductException {
-
-        Product product;
-        ProductWrapper productWrapper;
-        ResponseEntity<ProductWrapper> response;
-
+    public ResponseEntity<ProductWrapper> addNewProduct(@RequestBody ProductDto productDto) {
         try {
-            product = fakestoreService.addNewProduct(productDto);
-            productWrapper = new ProductWrapper(product,"Successfully added the product");
-            response = new ResponseEntity<>(productWrapper,HttpStatus.OK);
-        } catch (InvalidProductException e){
-            productWrapper = new ProductWrapper(null,"Couldnt Add the given product");
-            response = new ResponseEntity<>(productWrapper,HttpStatus.NOT_FOUND);
+            Product product = fakestoreService.addNewProduct(productDto);
+            ProductWrapper productWrapper = new ProductWrapper(product, "Successfully added the product");
+            return ResponseEntity.status(HttpStatus.CREATED).body(productWrapper);
+        } catch (InvalidProductException e) {
+            return new ResponseEntity<>(new ProductWrapper(null, "Couldn't add the given product"), HttpStatus.BAD_REQUEST);
         }
-
-        return response;
     }
-
 
     @PutMapping("/{productId}")
-    public String updateProduct(@PathVariable("productId") Long productId, @RequestBody ProductDto productDto){
-        return "updating single product with id : " + productId ;
+    public ResponseEntity<ProductWrapper> updateProduct(@PathVariable("productId") Long productId, @RequestBody ProductDto productDto) {
+        try {
+            Product updatedProduct = fakestoreService.updateProduct(productId, productDto);
+            ProductWrapper productWrapper = new ProductWrapper(updatedProduct, "Successfully updated the product");
+            return ResponseEntity.ok(productWrapper);
+        } catch (InvalidProductException e) {
+            return new ResponseEntity<>(new ProductWrapper(null, "Failed to update product"), HttpStatus.NOT_FOUND);
+        }
     }
 
+    @DeleteMapping("/{productId}")
+    public ResponseEntity<ProductWrapper> deleteProduct(@PathVariable Long productId) {
+        try {
+            Product deletedProduct = fakestoreService.deleteProduct(productId);
+            ProductWrapper productWrapper = new ProductWrapper(deletedProduct, "Successfully deleted the product");
+            return ResponseEntity.ok(productWrapper);
+        } catch (InvalidProductException e) {
+            return new ResponseEntity<>(new ProductWrapper(null, "Product not found"), HttpStatus.NOT_FOUND);
+        }
+    }
 
-    @DeleteMapping("/delete/{productId}")
-    public ResponseEntity<Product> deleteProduct(@PathVariable Long productId) throws InvalidProductException {
-        return new ResponseEntity<>(fakestoreService.deleteProduct(productId),HttpStatus.OK);
+    @GetMapping("/category/{categoryName}")
+    public ResponseEntity<List<Product>> getProductsByCategory(@PathVariable String categoryName) {
+        try {
+            List<Product> productList = fakestoreService.getProductsByCategory(categoryName);
+            return ResponseEntity.ok(productList);
+        } catch (InvalidProductException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
     }
 
 }

@@ -21,4 +21,6 @@ public interface ProductServices {
     Product updateProduct(Long productId, ProductDto productDto) throws InvalidProductException;
 
     Product deleteProduct(Long productId) throws InvalidProductException;
+
+    List<Product> getProductsByCategory(String categoryName) throws InvalidProductException;
 }
