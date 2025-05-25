@@ -1,5 +1,6 @@
 package com.fakestoreInteract.Ecommerce.Services;
 
+import com.fakestoreInteract.Ecommerce.DTOs.SendEmailMessageDto;
 import com.fakestoreInteract.Ecommerce.DTOs.UserLoginRequestDto;
 import com.fakestoreInteract.Ecommerce.DTOs.UserSignUpRequestDTO;
 import com.fakestoreInteract.Ecommerce.Exceptions.PasswordDoesntMatchException;
@@ -10,8 +11,10 @@ import com.fakestoreInteract.Ecommerce.Repositories.UserRepository;
 import com.fakestoreInteract.Ecommerce.Repositories.UserTokenReporsitory;
 import com.fakestoreInteract.Ecommerce.models.User;
 import com.fakestoreInteract.Ecommerce.models.UserToken;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +26,12 @@ import java.util.UUID;
 @Service
 @Transactional
 public class UserService {
+
+    @Autowired
+    private KafkaTemplate<String,String> kafkaTemplate;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Autowired
     private UserRepository userRepository;
@@ -40,7 +49,21 @@ public class UserService {
         }
 
         User user = getUserFromUserRequestDTO(userSignUpRequestDTO);
-        return userRepository.save(user);
+        userRepository.save(user);
+        SendEmailMessageDto message = new SendEmailMessageDto();
+        message.setFrom("chaitunadagouda@gmail.com");
+        message.setTo(user.getEmail());
+        message.setSubject("Welcome to Scaler!");
+        message.setBody("Hey! Looking forward to have you on our platform.");
+
+        try {
+            kafkaTemplate.send(
+                    "sendEmail",
+                    objectMapper.writeValueAsString(message)
+            );
+        } catch (Exception e) {}
+
+        return user;
     }
 
     public UserToken login(UserLoginRequestDto userLoginRequestDto)
