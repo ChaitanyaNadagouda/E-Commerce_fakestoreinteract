@@ -1,6 +1,14 @@
-# 🛒 E-Commerce Fake Store Interact
+
+# 🛒 E-Commerce Fake Store Interact with Email Notifications  
 
 An e-commerce backend application built with **Java** and **Spring Boot**, designed to interact with the [Fake Store API](https://fakestoreapi.com/). This project provides RESTful endpoints to fetch product data, manage user interactions, and simulate e-commerce functionalities. It integrates with a separate [Email Service](https://github.com/ChaitanyaNadagouda/emailService) via **Apache Kafka** to handle email notifications asynchronously.
+
+**A Spring Boot microservice that integrates with [Fake Store API](https://fakestoreapi.com/) and sends email notifications via Kafka.**  
+
+[![Java](https://img.shields.io/badge/Java-17%2B-orange?logo=openjdk)](https://openjdk.org/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.1%2B-brightgreen?logo=spring)](https://spring.io/)
+[![Apache Kafka](https://img.shields.io/badge/Apache%20Kafka-3.0%2B-black?logo=apachekafka)](https://kafka.apache.org/)
+[![License](https://img.shields.io/badge/License-MIT-blue)](LICENSE)
 
 ---
 
