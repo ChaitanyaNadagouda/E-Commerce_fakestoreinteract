@@ -14,41 +14,50 @@ The system follows a **microservices architecture** with two independent service
 - Publishes email messages to Kafka for notification delivery.
 
 ### 2. **Email Service**
-- Listens to Kafka topic `sendEmail`.
+- Listens to Kafka topic `send email`.
 - Sends email notifications using Gmail SMTP.
 
 ### 3. *Project Structure**
 
+This project consists of two main modules:
+
+### 1. E-Commerce_fakestoreinteract Module
+
+Main application module that handles e-commerce functionality.
+
 E-Commerce_fakestoreinteract/
 ├── src/
-│   └── main/
-│       ├── java/
-│       │   └── com/
-│       │       └── emailservice/
-│       │           ├── controllers/
-│       │           ├── services/
-│       │           ├── models/
-│       │           └── Application.java
-│       └── resources/
-│           └── application.properties
-├── pom.xml
+│ └── main/
+│ ├── java/
+│ │ └── com/
+│ │ └── emailservice/
+│ │ ├── controllers/ # REST API controllers
+│ │ ├── services/ # Business logic services
+│ │ ├── models/ # Data models and entities
+│ │ └── Application.java # Main application class
+│ └── resources/
+│ └── application.properties # Configuration file
+├── pom.xml # Maven build configuration
+
+---
+
+### 2. emailService Module
+
+Microservice responsible for handling email functionality.
 
 emailService/
 ├── src/
-│   └── main/
-│       ├── java/
-│       │   └── com/
-│       │       └── emailservice/
-│       │           ├── consumers/
-│       │           ├── dtos/
-│       │           ├── utilities/
-│       │           └── EmailServiceApplication.java
-│       └── resources/
-│           └── application.properties
-├── pom.xml
-
-
----
+│ └── main/
+│ ├── java/
+│ │ └── com/
+│ │ └── emailservice/
+│ │ ├── consumers/ # Message consumers
+│ │ ├── dtos/ # Data transfer objects
+│ │ ├── utilities/ # Helper classes
+│ │ └── EmailServiceApplication.java # Main class
+│ └── resources/
+│ └── application.properties # Configuration
+├── pom.xml # Maven build configuration
 
 ## 🚀 Features
 
