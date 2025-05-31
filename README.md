@@ -13,51 +13,23 @@ The system follows a **microservices architecture** with two independent service
 - Handles product retrieval, order placement, and user data.
 - Publishes email messages to Kafka for notification delivery.
 
+### Set Environment Variables
+
+username=${APP_USERNAME}  
+password=${APP_PASSWORD}  
+
+Through terminal or Integrated on any IDE like IntellijIdea Edit configurations Tab.
+
+export APP_USERNAME="your_email@gmail.com"
+
+export APP_PASSWORD="your_app_password"
+
+
+
 ### 2. **Email Service**
 - Listens to Kafka topic `send email`.
 - Sends email notifications using Gmail SMTP.
 
-### 3. *Project Structure**
-
-This project consists of two main modules:
-
-### 1. E-Commerce_fakestoreinteract Module
-
-Main application module that handles e-commerce functionality.
-
-E-Commerce_fakestoreinteract/
-├── src/
-│ └── main/
-│ ├── java/
-│ │ └── com/
-│ │ └── emailservice/
-│ │ ├── controllers/ # REST API controllers
-│ │ ├── services/ # Business logic services
-│ │ ├── models/ # Data models and entities
-│ │ └── Application.java # Main application class
-│ └── resources/
-│ └── application.properties # Configuration file
-├── pom.xml # Maven build configuration
-
----
-
-### 2. emailService Module
-
-Microservice responsible for handling email functionality.
-
-emailService/
-├── src/
-│ └── main/
-│ ├── java/
-│ │ └── com/
-│ │ └── emailservice/
-│ │ ├── consumers/ # Message consumers
-│ │ ├── dtos/ # Data transfer objects
-│ │ ├── utilities/ # Helper classes
-│ │ └── EmailServiceApplication.java # Main class
-│ └── resources/
-│ └── application.properties # Configuration
-├── pom.xml # Maven build configuration
 
 ## 🚀 Features
 
@@ -81,6 +53,19 @@ emailService/
 
 ## ⚙️ Getting Started
 
+📚 API Documentation
+E-Commerce Service Endpoints
+Endpoint	Method	Description
+/api/products	GET	Fetch all products
+/api/products/{id}	GET	Get product by ID
+/api/orders	POST	Place a new order (triggers Kafka email)
+
+# E-Commerce Service 
+cd E-Commerce_fakestoreinteract && mvn spring-boot:run
+
+# Email Service 
+cd emailService && mvn spring-boot:run
+
 ### ✅ Prerequisites
 
 - Java 17 or higher
@@ -95,22 +80,16 @@ emailService/
 #### Step 1: Clone the Repositories
 
 git clone https://github.com/ChaitanyaNadagouda/E-Commerce_fakestoreinteract.git
+
 git clone https://github.com/ChaitanyaNadagouda/emailService.git
 
 
-### 📌 Step 2: Set Environment Variables
-
-Configure the following variables for the **Email Service** to authenticate Gmail SMTP:
-
-export APP_USERNAME=your_email@gmail.com
-export APP_PASSWORD=your_app_password
-
-### 📌 Step 3: Set up Kafka
+### 📌 Step 2: Set up Kafka
 
 https://www.geeksforgeeks.org/installation-guide/how-to-install-and-run-apache-kafka-on-windows/
 
 
-### 📌 Step 4: Build and Start
+### 📌 Step 3: Build and Start
 Make sure Your zookeeper and kafka both are up and even email service too.
 
 
