@@ -53,8 +53,8 @@ public class UserService {
         SendEmailMessageDto message = new SendEmailMessageDto();
         message.setFrom("chaitunadagouda@gmail.com");
         message.setTo(user.getEmail());
-        message.setSubject("Welcome to Scaler!");
-        message.setBody("Hey! Looking forward to have you on our platform.");
+        message.setSubject("Welcome !" + user.getFirstName() + " " + user.getLastName());
+        message.setBody("Hey! its pleasure to have you on board. this is the test mail from the server which is being created on two different instances thanks for your cooperation. ");
 
         try {
             kafkaTemplate.send(
